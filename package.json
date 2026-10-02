@@ -1,0 +1,45 @@
+{
+  "name": "turtle-launcher",
+  "productName": "Giolgăii WoW",
+  "version": "1.0.0",
+  "description": "Launcher and auto-updater for the Giolgăii WoW server",
+  "main": "src/main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/update-server.js",
+    "test": "node --test test/",
+    "dist:linux": "electron-builder --linux AppImage",
+    "dist:win": "electron-builder --win portable",
+    "dist:linux-dir": "electron-builder --linux dir"
+  },
+  "build": {
+    "appId": "local.giolgaii.wow",
+    "files": [
+      "src/**",
+      "defaults.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Game",
+      "icon": "build/icon.png",
+      "artifactName": "GiolgaiiWoW-${version}.AppImage",
+      "executableName": "GiolgaiiWoW"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "GiolgaiiWoW.exe"
+    },
+    "productName": "Giolgăii WoW"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  }
+}

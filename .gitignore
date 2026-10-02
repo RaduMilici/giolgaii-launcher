@@ -1,0 +1,4 @@
+node_modules/
+dist/
+server/launcher-data/client/*
+!server/launcher-data/client/.gitkeep

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'">
+  <title>Giolgăii WoW</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <img class="watermark" src="assets/icon.png" alt="">
+  <div class="vignette"></div>
+
+  <header>
+    <div class="brand">
+      <img class="crest" src="assets/icon.png" alt="">
+      <div>
+        <h1>Giolgăii WoW</h1>
+        <div class="tagline"><span class="rule"></span>Turtle WoW · Private Realm<span class="rule"></span></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status" id="realm-status"><span class="dot"></span><span class="label">Checking realm…</span></div>
+      <button class="icon" id="open-settings" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="panel realm">
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <div class="realm-crest"><img src="assets/icon.png" alt=""></div>
+      <div class="realm-label">Realm</div>
+      <div class="realm-name" id="server-name">—</div>
+      <div class="divider"><span>◆</span></div>
+      <div class="realm-meta" id="server-url"></div>
+    </aside>
+
+    <section class="panel news">
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <h2><span>Chronicles of the Realm</span></h2>
+      <div class="news-scroll" id="news-list"><p class="muted">Nothing yet.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="progress-area">
+      <div class="progress-text"><span id="status-text">Starting…</span><span id="status-detail"></span></div>
+      <div class="bar"><div class="fill" id="bar-fill"></div></div>
+    </div>
+    <button id="play" class="play" disabled>Play</button>
+  </footer>
+
+  <dialog id="settings">
+    <form method="dialog" id="settings-form">
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <h2><span>Settings</span></h2>
+      <label>World of Warcraft folder
+        <div class="row">
+          <input id="s-clientDir" type="text" spellcheck="false">
+          <button type="button" id="browse">Browse…</button>
+        </div>
+      </label>
+      <div class="two">
+        <label>Realm address
+          <input id="s-realmHost" type="text" spellcheck="false" placeholder="63.184.170.236">
+        </label>
+        <label>Update server
+          <input id="s-serverUrl" type="url" spellcheck="false" placeholder="http://your-server:8090/">
+        </label>
+      </div>
+      <label>Game executable
+        <input id="s-executable" type="text" spellcheck="false">
+      </label>
+      <div class="unix-only two">
+        <label>Launch command
+          <input id="s-launchCommand" type="text" spellcheck="false" placeholder="wine, umu-run, lutris…">
+        </label>
+        <label>WINEPREFIX (optional)
+          <input id="s-winePrefix" type="text" spellcheck="false" placeholder="~/.wine">
+        </label>
+      </div>
+      <label class="check"><input id="s-closeOnLaunch" type="checkbox"> Close launcher when the game starts</label>
+      <div class="tools">
+        <button type="button" id="verify">Verify all files</button>
+        <button type="button" id="clear-cache">Clear WDB cache</button>
+        <button type="button" id="open-folder">Open game folder</button>
+      </div>
+      <div class="actions">
+        <button value="cancel" formnovalidate>Cancel</button>
+        <button value="save" class="primary" id="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

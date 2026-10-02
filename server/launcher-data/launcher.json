@@ -1,0 +1,18 @@
+{
+  "name": "Giolgăii WoW",
+  "realmlist": "63.184.170.236",
+  "clearCache": true,
+  "delete": [],
+  "news": [
+    {
+      "title": "New: Thrill of the Kill",
+      "date": "2026-10-02",
+      "body": "Every kill now fuels the next. Each enemy you slay grants a stack of Thrill of the Kill: +1% damage done for 60 seconds, stacking up to 10 times (+10%). Every new kill refreshes the timer, so keep the momentum going! Player kills in PvP count too. Grey-level mobs and critters don't, so no farming rabbits. The launcher installs the client patch automatically; you'll see the buff on your bar after your first kill."
+    },
+    {
+      "title": "Welcome",
+      "date": "2026-10-01",
+      "body": "The launcher keeps your client in sync with the server. Hit Play once it says Ready."
+    }
+  ]
+}

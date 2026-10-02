@@ -1,0 +1,11 @@
+{
+  "realmHost": "63.184.170.236",
+  "realmPort": 3724,
+  "worldPort": 8085,
+  "serverUrl": "http://63.184.170.236:8090/",
+  "executable": "WoW.exe",
+  "launchCommand": "wine",
+  "winePrefix": "",
+  "clientDir": "",
+  "closeOnLaunch": false
+}

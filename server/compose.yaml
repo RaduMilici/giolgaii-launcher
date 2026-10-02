@@ -1,0 +1,17 @@
+# Runs the launcher update server next to tortoise-deploy.
+# Host networking lets it probe realmd/mangosd on 127.0.0.1 and listen on :8090.
+services:
+  launcher-updates:
+    image: node:22-alpine
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    command: ["node", "update-server.js"]
+    environment:
+      PORT: "8090"
+      DATA_DIR: /data
+      REALMD_PORT: "3724"
+      WORLD_PORT: "8085"
+    volumes:
+      - ./update-server.js:/app/update-server.js:ro
+      - ./launcher-data:/data:ro
