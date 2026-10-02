@@ -5,6 +5,11 @@
   "delete": [],
   "news": [
     {
+      "title": "Living World Update",
+      "date": "2026-10-02",
+      "body": "The roads are no longer empty. Azeroth stirs with new life:\n\n◆ Wandering heroes: adventurers roam the land, leveling, questing and braving dungeons beside you. Spot them with /who.\n◆ The Auction House opens its doors: cloth, ore, herbs, potions, food and reagents for your level, plus spoils hauled back from the wilds. Fresh stock arrives all day, and listings last up to two days.\n◆ Dungeons bend to your party: too few allies? Monsters weaken to match your numbers (and drop a little less gold), so a small band can still storm a full dungeon.\n◆ Thrill of the Kill: the buff now shows your total bonus as the stacks climb."
+    },
+    {
       "title": "New: Thrill of the Kill",
       "date": "2026-10-02",
       "body": "Every kill now fuels the next. Each enemy you slay grants a stack of Thrill of the Kill: +1% damage done for 60 seconds, stacking up to 10 times (+10%). Every new kill refreshes the timer, so keep the momentum going! Player kills in PvP count too. Grey-level mobs and critters don't, so no farming rabbits. The launcher installs the client patch automatically; you'll see the buff on your bar after your first kill."
