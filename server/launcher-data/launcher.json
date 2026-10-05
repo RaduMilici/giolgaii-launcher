@@ -5,6 +5,16 @@
   "delete": [],
   "news": [
     {
+      "title": "New: Zone Completion Rewards",
+      "date": "2026-10-05",
+      "body": "Finishing a zone now earns you more than a pat on the back. Each of the 50 zones has its own set of keepsakes, unlocked as you work through its journal:\n\n◆ 25%: a handful of silly disguises. Ever wanted to be a dust devil in Westfall, or a Bloodsail swashbuckler in Stranglethorn? Ten minutes, no questions asked.\n◆ 50%: a one-use teleport charm back to a landmark of the zone, from Booty Bay to Everlook.\n◆ 75%: a stack of local food or drink with a 30-minute buff (one zone feast at a time), plus a shirt or cloak to remember the place by.\n◆ 100%: the zone's tabard, a companion pet for your collection and a title to wear. Lil' Hogger, Stitches Jr. and Mukla Jr. are waiting.\n\nTitles show up in the title list on your character sheet. Bonus XP and coin still come as before; these rewards come on top. They're paid for milestones you reach from today on.\n\nOpen your journal (/azc) to see how close you are. Fifty tabards, fifty pets, fifty titles. Somebody is going to collect them all."
+    },
+    {
+      "title": "New: Azeroth Completion",
+      "date": "2026-10-04",
+      "body": "Ever wondered what lies past that next hill? Now Azeroth keeps score. Every zone has become a checklist of things to find, finish and defeat, and your new journal tracks all of it:\n\n◆ Exploration: every corner worth discovering, from Moonbrook to the farthest pond.\n◆ Storylines: whole quest chains, with the next step, who starts it and why it might still be locked.\n◆ Rare Hunts: elusive rares stay a mystery (\"Undiscovered Rare\") until you track them down.\n◆ Elite Encounters: the big, named brutes of the wilds. Bring friends.\n◆ Travel: every flight path your faction can claim.\n\nHit 25%, 50%, 75% and 100% in a zone for bonus XP and coin, and finish a zone completely for a celebration worthy of the deed. Already explored half of Elwynn? Your past adventures count: areas you've discovered, quests you've finished and flight paths you know are recognised the moment you log in.\n\nClick the new map button on your minimap (or type /azc) to open your journal. Search for any zone, quest or place, check the Missing tab to see exactly what's left, and browse the Azeroth tab to see how much of the world is yours. The launcher installs the addon automatically. Now go find out what's behind that hill."
+    },
+    {
       "title": "Living World Update",
       "date": "2026-10-02",
       "body": "The roads are no longer empty. Azeroth stirs with new life:\n\n◆ Wandering heroes: adventurers roam the land, leveling, questing and braving dungeons beside you. Spot them with /who.\n◆ The Auction House opens its doors: cloth, ore, herbs, potions, food and reagents for your level, plus spoils hauled back from the wilds. Fresh stock arrives all day, and listings last up to two days.\n◆ Dungeons bend to your party: too few allies? Monsters weaken to match your numbers (and drop a little less gold), so a small band can still storm a full dungeon.\n◆ Thrill of the Kill: the buff now shows your total bonus as the stacks climb."
