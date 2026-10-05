@@ -1,0 +1,62 @@
+# Checks the AzerothCompletion addon, then copies the update server and the tracked launcher
+# files to the Lightsail server (~/turtle-launcher/server). The update server rescans
+# launcher-data on every manifest request, so it is only restarted when its own code changes.
+#
+# Repository secrets (Settings -> Secrets and variables -> Actions):
+#   DEPLOY_SSH_KEY      private key whose public half is in the server's ~/.ssh/authorized_keys
+#   DEPLOY_SSH_TARGET   user@host, e.g. ubuntu@63.184.170.236
+#   DEPLOY_KNOWN_HOSTS  output of `ssh-keyscan <host>` (pins the server's host key)
+name: Deploy launcher data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - server/**
+      - test/addon/**
+      - .github/workflows/deploy-launcher-data.yml
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-launcher-data
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check addon
+        run: test/addon/check-addon.sh
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf 'Host deploy\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n' \
+            "${DEPLOY_SSH_TARGET#*@}" "${DEPLOY_SSH_TARGET%@*}" > ~/.ssh/config
+        env:
+          DEPLOY_SSH_TARGET: ${{ secrets.DEPLOY_SSH_TARGET }}
+
+      # -c compares contents, since a fresh checkout gives every file a new mtime.
+      # Only files tracked here are sent. Untracked server files (patch-Z.mpq, other addons) are
+      # left alone; inside our own addon folder, files deleted in git are deleted on the server.
+      - name: Sync files
+        run: |
+          rsync -rtcv --itemize-changes server/update-server.js server/compose.yaml deploy:turtle-launcher/server/ | tee code.log
+          rsync -rtcv server/launcher-data/launcher.json deploy:turtle-launcher/server/launcher-data/
+          ssh deploy 'mkdir -p turtle-launcher/server/launcher-data/client/Interface/AddOns'
+          rsync -rtcv --delete server/launcher-data/client/Interface/AddOns/AzerothCompletion \
+            deploy:turtle-launcher/server/launcher-data/client/Interface/AddOns/
+
+      - name: Restart update server
+        run: |
+          if grep -qE '^[<>]f' code.log; then
+            ssh deploy 'cd turtle-launcher/server && docker compose up -d && docker compose restart launcher-updates'
+          else
+            echo "update-server.js and compose.yaml unchanged; no restart needed"
+          fi
