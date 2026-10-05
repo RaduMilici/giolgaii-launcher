@@ -2,3 +2,9 @@ node_modules/
 dist/
 server/launcher-data/client/*
 !server/launcher-data/client/.gitkeep
+# our own addons are source, not client files
+!server/launcher-data/client/Interface/
+server/launcher-data/client/Interface/*
+!server/launcher-data/client/Interface/AddOns/
+server/launcher-data/client/Interface/AddOns/*
+!server/launcher-data/client/Interface/AddOns/AzerothCompletion/
