@@ -2,7 +2,9 @@
   "name": "Giolgăii WoW",
   "realmlist": "63.184.170.236",
   "clearCache": true,
-  "delete": [],
+  "delete": [
+    "Interface/AddOns/AzerothCompletion"
+  ],
   "news": [
     {
       "title": "New: Zone Completion Rewards",
