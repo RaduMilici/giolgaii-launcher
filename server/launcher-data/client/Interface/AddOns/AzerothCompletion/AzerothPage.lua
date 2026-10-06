@@ -1,4 +1,4 @@
--- Azeroth Completion: completion across every zone, by continent.
+-- Azeroth Completion: completion across every zone, by region and by continent.
 
 local AZC = AZC
 local W = AZC.W
@@ -90,6 +90,168 @@ local function Row()
     return r
 end
 
+-- ---------------------------------------------------------------------------
+-- regions: groups of zones with a reward for completing all of them
+
+local REGION_WIDTH = COL_WIDTH * 2 + 20
+local REGION_HEIGHT = 66
+local REWARD_ICON = 26
+local cards, usedCards = {}, 0
+local regionTitle
+
+local function ZoneLines(region)
+    local lines = {}
+    if region.desc and region.desc ~= "" then
+        table.insert(lines, { region.desc, "parchment", true })
+        table.insert(lines, "")
+    end
+    for _, rz in ipairs(region.zones) do
+        if AZC.Bool(rz.app) then
+            local done = AZC.Bool(rz.earned)
+            table.insert(lines, { left = rz.zn, right = done and "Complete" or (AZC.Num(rz.pct) .. "%"),
+                leftColor = done and "gold" or "white", rightColor = done and "gold" or "grey" })
+        end
+    end
+    local skipped = 0
+    for _, rz in ipairs(region.zones) do
+        if not AZC.Bool(rz.app) then skipped = skipped + 1 end
+    end
+    if skipped > 0 then
+        table.insert(lines, "")
+        table.insert(lines, { skipped .. (skipped == 1 and " zone has" or " zones have") .. " nothing for you and do not count.", "dim", true })
+    end
+    if region.rw and region.rw ~= "" then
+        table.insert(lines, "")
+        table.insert(lines, { (AZC.Bool(region.earned) and "Rewarded: " or "Reward: ") .. region.rw, "paleGold", true })
+    end
+    return lines
+end
+
+local function Card()
+    usedCards = usedCards + 1
+    local c = cards[usedCards]
+    if not c then
+        c = CreateFrame("Button", nil, child)
+        c:SetWidth(REGION_WIDTH)
+        c:SetHeight(REGION_HEIGHT - 6)
+        W.Backdrop(c, "thin", 0.08, 0.07, 0.05, 0.85, 0.5, 0.4, 0.25)
+        c.icon = W.FramedIcon(c, 34, nil)
+        c.icon:SetPoint("TOPLEFT", c, "TOPLEFT", 6, -6)
+        c.check = c:CreateTexture(nil, "OVERLAY")
+        c.check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+        c.check:SetWidth(22)
+        c.check:SetHeight(22)
+        c.check:SetPoint("BOTTOMRIGHT", c.icon, "BOTTOMRIGHT", 6, -6)
+        c.name = W.Text(c, 15, "white", AZC.FONT_TITLE)
+        c.name:SetPoint("TOPLEFT", c, "TOPLEFT", 54, -6)
+        c.count = W.Text(c, 11, "grey")
+        c.count:SetPoint("LEFT", c.name, "RIGHT", 10, 0)
+        c.desc = W.Text(c, 10, "grey")
+        c.desc:SetPoint("TOPLEFT", c, "TOPLEFT", 54, -25)
+        c.desc:SetWidth(400)
+        c.desc:SetJustifyH("LEFT")
+        c.bar = W.ProgressBar(c, 10)
+        c.bar:SetPoint("TOPLEFT", c, "TOPLEFT", 54, -42)
+        c.bar:SetWidth(400)
+        c.bar:SetKnownWidth(400)
+        c.reward = W.Text(c, 10, "paleGold")
+        c.reward:SetPoint("TOPRIGHT", c, "TOPRIGHT", -8, -6)
+        c.reward:SetJustifyH("RIGHT")
+        c.reward:SetWidth(230)
+        c.items = {}
+        local hl = c:CreateTexture(nil, "HIGHLIGHT")
+        hl:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        hl:SetBlendMode("ADD")
+        hl:SetAllPoints(c)
+        hl:SetAlpha(0.25)
+        c:SetScript("OnEnter", function()
+            local region = this.region
+            if region then W.ShowTooltip(this, region.n, ZoneLines(region)) end
+        end)
+        c:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        cards[usedCards] = c
+    end
+    c:Show()
+    return c
+end
+
+-- Fills a region card; items are "id:count,id:count".
+local function FillCard(c, region)
+    c.region = region
+    local done, total = AZC.Num(region.d), AZC.Num(region.tot)
+    local earned = AZC.Bool(region.earned)
+    c.icon.icon:SetTexture((region.icon and region.icon ~= "") and region.icon or "Interface\\Icons\\INV_Misc_Map_01")
+    if earned then c.check:Show() else c.check:Hide() end
+    c.name:SetText(region.n)
+    W.SetColor(c.name, earned and "gold" or "white")
+    if earned then
+        local when = AZC.FormatDate(region.at)
+        c.count:SetText(AZC.Color("gold", "Complete") .. (when and ("  " .. when) or ""))
+    else
+        c.count:SetText(done .. " / " .. total .. " zones")
+    end
+    c.desc:SetText(region.desc or "")
+    c.bar:SetProgress(done, total, earned)
+    if earned then c:SetBackdropBorderColor(0.95, 0.78, 0.3) else c:SetBackdropBorderColor(0.5, 0.4, 0.25) end
+
+    for _, b in ipairs(c.items) do b:Hide() end
+    local n = 0
+    for _, part in ipairs(AZC.Split(region.it or "", ",")) do
+        local _, _, id, count = string.find(part, "^(%d+):(%d+)$")
+        if id then
+            n = n + 1
+            local b = c.items[n]
+            if not b then
+                b = W.ItemButton(c, REWARD_ICON)
+                c.items[n] = b
+            end
+            b:ClearAllPoints()
+            b:SetPoint("BOTTOMRIGHT", c, "BOTTOMRIGHT", -8 - (n - 1) * (REWARD_ICON + 10), 5)
+            b:SetItem(tonumber(id), tonumber(count))
+            b:Show()
+        end
+    end
+    -- what is not an item (gold, a title) as text above the icons
+    local extra = region.rx or ""
+    if extra == "" and n == 0 then extra = region.rw or "" end
+    c.reward:SetText(extra)
+    W.SetColor(c.reward, earned and "dim" or "paleGold")
+end
+
+-- Places the region cards from the top; returns the height they take.
+local function PlaceRegions()
+    for i = 1, usedCards do cards[i]:Hide() end
+    usedCards = 0
+    if not regionTitle then
+        regionTitle = W.Text(child, 17, "gold", AZC.FONT_TITLE)
+    end
+    local regions = D.regions
+    if not regions then
+        if AZC.Protocol.IsReady() and not D.IsLoading("regions") and not D.HasFailed("regions") then D.RequestRegions() end
+        regionTitle:Hide()
+        return 0
+    end
+    if table.getn(regions) == 0 then
+        regionTitle:Hide()
+        return 0
+    end
+    local completed = 0
+    for _, r in ipairs(regions) do
+        if AZC.Bool(r.earned) then completed = completed + 1 end
+    end
+    regionTitle:SetText("REGIONS   " .. AZC.Color("paleGold", completed .. " of " .. table.getn(regions) .. " complete"))
+    view:Place(regionTitle, 4, 0, 24)
+    local yy = 26
+    for _, region in ipairs(regions) do
+        local c = Card()
+        c:ClearAllPoints()
+        view:Place(c, 0, yy, REGION_HEIGHT - 6)
+        FillCard(c, region)
+        yy = yy + REGION_HEIGHT
+    end
+    return yy + 14
+end
+
 local function Header(i)
     local h = headers[i]
     if not h then
@@ -128,6 +290,7 @@ function page:Refresh()
         return
     end
 
+    local base = PlaceRegions()
     local currentZone = p.cur and AZC.Num(p.cur.z) or 0
     local allPct, allCount, completed = 0, 0, 0
     local maxHeight = 0
@@ -153,7 +316,7 @@ function page:Refresh()
             return a.n < b.n
         end)
         local x = math.mod(ci - 1, 2) * (COL_WIDTH + 20)
-        local top = math.floor((ci - 1) / 2) * (maxHeight + 20)
+        local top = base + math.floor((ci - 1) / 2) * (maxHeight + 20)
         local h = Header(ci)
         h:ClearAllPoints()
         view:Place(h, x, top, h:GetHeight())
@@ -196,7 +359,7 @@ function page:Refresh()
         end
         maxHeight = math.max(maxHeight, yy - top)
     end
-    view:Finish(maxHeight * math.ceil(table.getn(columnDefs) / 2) + 20)
+    view:Finish(base + maxHeight * math.ceil(table.getn(columnDefs) / 2) + 20)
 
     local world = allCount > 0 and math.floor(allPct / allCount) or 0
     worldPct:SetText(world .. "%")
@@ -206,7 +369,10 @@ end
 function page:Show(params)
     UI.SetBreadcrumbs({ { label = "Azeroth" } })
     -- always fresh: other zones may have moved since we last looked
-    if AZC.Protocol.IsReady() then D.RequestProgress() end
+    if AZC.Protocol.IsReady() then
+        D.RequestProgress()
+        D.RequestRegions()
+    end
     self:Refresh()
 end
 

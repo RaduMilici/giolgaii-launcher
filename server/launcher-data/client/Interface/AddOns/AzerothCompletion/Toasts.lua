@@ -18,8 +18,9 @@ frame:Hide()
 W.Backdrop(frame, "panel", 0.05, 0.04, 0.03, 0.94, 0.85, 0.68, 0.32)
 frame:EnableMouse(true)
 frame:SetScript("OnMouseUp", function()
-    -- clicking a toast opens the journal on that zone
-    if this.zoneId then AZC.UI.OpenZone(this.zoneId) end
+    -- clicking a toast opens the journal on that zone (or page)
+    if this.zoneId then AZC.UI.OpenZone(this.zoneId)
+    elseif this.tab then AZC.UI.Open(this.tab) end
     this.elapsed = FADE_IN + HOLD
 end)
 
@@ -61,6 +62,7 @@ frame.stars[2]:SetPoint("CENTER", frame, "BOTTOMRIGHT", -10, 6)
 
 local function Present(t)
     frame.zoneId = t.zoneId
+    frame.tab = t.tab
     frame.iconHolder.icon:SetTexture(t.icon or "Interface\\Icons\\INV_Misc_Map_01")
     frame.title:SetText(t.title or "")
     frame.name:SetText(t.name or "")
@@ -167,6 +169,10 @@ AZC.On("ServerEvent", function(ev)
         local sub = ev.rw and ev.rw ~= "" and ("Reward: " .. ev.rw) or "Milestone reached"
         T.Push({ zoneId = zoneId, icon = "Interface\\Icons\\INV_Box_02", title = AZC.Upper(zoneName),
             name = AZC.Num(ev.m) .. "% COMPLETE", sub = sub, sound = "QUESTCOMPLETED" })
+    elseif ev.t == "REGION_COMPLETED" and AZC.db.milestoneNotifications then
+        local sub = ev.rw and ev.rw ~= "" and ("Reward: " .. ev.rw) or ("All " .. AZC.Num(ev.zc) .. " zones complete.")
+        T.Push({ tab = "azeroth", icon = "Interface\\Icons\\INV_Misc_Map02", title = "REGION COMPLETE",
+            name = AZC.Upper(ev.rn or ""), sub = sub, sound = "LEVELUPSOUND", big = true })
     elseif ev.t == "ZONE_COMPLETED" and AZC.db.milestoneNotifications then
         T.Push({ zoneId = zoneId, icon = "Interface\\Icons\\INV_Misc_Map_01", title = "ZONE COMPLETE",
             name = AZC.Upper(zoneName) .. "  100%", sub = "Every corner explored, every tale told.", sound = "LEVELUPSOUND", big = true })

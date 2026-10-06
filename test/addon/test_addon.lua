@@ -86,6 +86,16 @@ local function Payload(cmd, args)
             rec("ZSUM", { "id", 40, "n", "Westfall", "pct", 68, "d", 32, "tot", 47, "lmin", 9, "lmax", 18, "map", 0, "earned", 0 }) .. ";" ..
             rec("ZSUM", { "id", 14, "n", "Durotar", "pct", 0, "d", 0, "tot", 30, "lmin", 1, "lmax", 10, "map", 1, "earned", 0 })
     end
+    if cmd == "GET_REGIONS" then
+        return rec("REGION", { "id", 1, "n", "The Kingdom of Azeroth", "desc", "Elwynn to the Blasted Lands.", "icon", "Interface\\Icons\\INV_BannerPVP_02",
+                "d", 1, "tot", 2, "done", 0, "earned", 0, "rw", "25g, Lion's Pride Charger", "rx", "25g", "it", "93801:1" }) .. ";" ..
+            rec("RZ", { "r", 1, "z", 12, "zn", "Elwynn Forest", "pct", 100, "earned", 1, "app", 1, "lmin", 1, "lmax", 10 }) .. ";" ..
+            rec("RZ", { "r", 1, "z", 40, "zn", "Westfall", "pct", 68, "earned", 0, "app", 1, "lmin", 9, "lmax", 18 }) .. ";" ..
+            rec("RZ", { "r", 1, "z", 1519, "zn", "Stormwind City", "pct", 0, "earned", 0, "app", 0 }) .. ";" ..
+            rec("REGION", { "id", 9, "n", "Eastern Kingdoms", "d", 1, "tot", 1, "done", 1, "earned", 1, "at", 1790000000,
+                "rw", "50g, title \"Pathfinder of the Eastern Kingdoms\"", "rx", "50g, title \"Pathfinder of the Eastern Kingdoms\"" }) .. ";" ..
+            rec("RZ", { "r", 9, "z", 12, "zn", "Elwynn Forest", "pct", 100, "earned", 1, "app", 1 })
+    end
     if cmd == "SEARCH" then
         return rec("HIT", { "k", "zone", "id", "zone:40", "n", "Westfall", "z", 40, "zn", "Westfall" }) .. ";" ..
             rec("HIT", { "k", "storyline", "id", "storyline:65", "n", "The Defias Brotherhood", "z", 40, "zn", "Westfall" }) .. ";" ..
@@ -199,7 +209,13 @@ Try("reward items", function()
     AZC.Detail.ShowRewards(40)
     local function Buttons()
         local out = {}
-        for _, f in ipairs(AllFrames()) do if f.itemId then table.insert(out, f) end end
+        local function OnZonePage(f)
+            while f do
+                if f == AZC.ZonePage.frame then return true end
+                f = f._parent
+            end
+        end
+        for _, f in ipairs(AllFrames()) do if f.itemId and OnZonePage(f) then table.insert(out, f) end end
         return out
     end
     local shown = Buttons()
@@ -225,6 +241,22 @@ Try("reward items", function()
     assert(linked[2] == "dressup item:93502:0:0:0", "dress up " .. tostring(linked[2]))
 end)
 Try("azeroth", function() AZC.UI.Navigate("azeroth", {}) Pump() AZC.UI.Refresh() clicks = clicks + ClickAll("azeroth") end)
+Try("regions", function()
+    local seen = {}
+    local function Walk(frame)
+        for _, c in ipairs(frame._children) do
+            if c._kind == "FontString" and c._shown and c._text ~= "" then seen[c._text] = true end
+            if c._shown then Walk(c) end
+        end
+    end
+    Walk(AZC.AzerothPage.frame)
+    assert(seen["The Kingdom of Azeroth"] and seen["Eastern Kingdoms"], "region cards")
+    assert(seen["1 / 2 zones"], "region progress counts only zones that apply")
+    assert(seen["25g"], "non-item reward text next to the mount icon")
+    local card
+    for _, f in ipairs(AllFrames()) do if f.region and f.region.id == "1" then card = f end end
+    this = card card._scripts.OnEnter()
+end)
 Try("search", function() AZC.UI.Navigate("search", { text = "defias" }) Pump() AZC.UI.Refresh() clicks = clicks + ClickAll("search") Pump() end)
 Try("settings", function() AZC.UI.Navigate("settings", {}) clicks = clicks + ClickAll("settings") end)
 Try("back", function() for i = 1, 5 do AZC.UI.Back() end end)
@@ -237,6 +269,7 @@ Try("events", function()
     Event({ "t", "ZONE_COMPLETED", "z", 40, "zn", "Westfall", "zp", 100, "ver", 3 })
     Event({ "t", "DEFINITION_UPDATED", "gen", 2, "zones", "40:4" })
     Event({ "t", "RETROACTIVE", "count", 3 })
+    Event({ "t", "REGION_COMPLETED", "r", 1, "rn", "The Kingdom of Azeroth", "zc", 8, "rw", "25g, Lion's Pride Charger", "it", "93801:1" })
     Pump() RunUpdates(40) Pump()
     clicks = clicks + ClickAll("after events")
 end)

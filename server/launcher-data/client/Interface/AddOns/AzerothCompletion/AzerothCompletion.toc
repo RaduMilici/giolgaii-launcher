@@ -2,7 +2,7 @@
 ## Title: |cffe6c35cAzeroth Completion|r
 ## Notes: Your journal of every zone: exploration, storylines, rare hunts, elite encounters and flight paths.
 ## Author: Giolgaii WoW
-## Version: 1.1.0
+## Version: 1.2.0
 ## SavedVariables: AzerothCompletionDB
 
 ZoneTitles.lua

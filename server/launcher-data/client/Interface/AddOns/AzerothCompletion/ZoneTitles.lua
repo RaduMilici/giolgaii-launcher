@@ -52,3 +52,6 @@ PVP_MEDAL116 = "Defender of Nordrassil"  -- Hyjal
 PVP_MEDAL117 = "Banana Baron"  -- Tel'Abim
 PVP_MEDAL118 = "Blackstone Islander"  -- Blackstone Island
 PVP_MEDAL119 = "Friend of Kaneq'nuun"  -- Icepoint Rock
+PVP_MEDAL120 = "Pathfinder of the Eastern Kingdoms"  -- region: Eastern Kingdoms
+PVP_MEDAL121 = "Pathfinder of Kalimdor"  -- region: Kalimdor
+PVP_MEDAL122 = "Master of Azeroth"  -- region: Azeroth

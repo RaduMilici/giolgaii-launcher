@@ -10,6 +10,7 @@ D.zones = {}        -- zoneId -> { zone, cats = {key = CAT}, objs = {key = {OBJ.
 D.stories = {}      -- storylineId -> { story, quests = {id = QUEST}, order = {ids}, qobj = {id = {texts}}, exg = {} }
 D.details = {}      -- objectiveId -> records
 D.progress = nil    -- { cur = CUR, zones = {ZSUM...} }
+D.regions = nil     -- { REGION... } in display order, each with .zones = {RZ...}
 D.currentZoneId = nil
 
 local inflight = {}
@@ -170,6 +171,23 @@ function D.RequestProgress(cb)
     end, cb)
 end
 
+function D.RequestRegions(cb)
+    Fetch("regions", "GET_REGIONS", "", function(records)
+        local list, byId = {}, {}
+        for _, rec in ipairs(records) do
+            if rec.type == "REGION" then
+                rec.zones = {}
+                table.insert(list, rec)
+                byId[rec.id] = rec
+            elseif rec.type == "RZ" and byId[rec.r] then
+                table.insert(byId[rec.r].zones, rec)
+            end
+        end
+        D.regions = list
+        AZC.Fire("DataChanged", "regions")
+    end, cb)
+end
+
 function D.Search(text, cb)
     AZC.Protocol.Request("SEARCH", text, cb)
 end
@@ -231,6 +249,7 @@ local function Invalidate(zoneId)
     D.details = {}
     D.stories = {}
     D.progress = nil
+    D.regions = nil
     failedAt = {}
 end
 D.Invalidate = Invalidate
@@ -259,6 +278,11 @@ AZC.On("ServerEvent", function(ev)
         return
     end
     if ev.t == "RETROACTIVE" then return end
+    if ev.t == "REGION_COMPLETED" then
+        D.regions = nil
+        AZC.Fire("DataChanged", "regions")
+        return
+    end
     -- the server changed something in zone z: forget what we knew and ask again
     local zoneId = AZC.Num(ev.z)
     if zoneId > 0 then
