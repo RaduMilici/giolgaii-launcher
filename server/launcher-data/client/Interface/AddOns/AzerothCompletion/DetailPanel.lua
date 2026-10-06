@@ -327,6 +327,15 @@ local function RenderObjective()
         Heading("Location")
         if area and area.pn and area.pn ~= "" then Text("Part of " .. area.pn, "parchment", 11) end
         if AZC.Num(obj.lv) > 0 then Text("Discovery level " .. AZC.Num(obj.lv), "parchment", 11) end
+    elseif obj.c == "lore" then
+        if obj.txt and obj.txt ~= "" then
+            Heading("It reads")
+            Text("\"" .. obj.txt .. "\"", "parchment", 11)
+        end
+        Heading(AZC.Bool(obj.sec) and "Secret" or "Where")
+        if obj.an and obj.an ~= "" then Text("At " .. obj.an, "parchment", 11) end
+        if AZC.Num(obj.sc) > 1 then Text(AZC.Num(obj.sc) .. " copies in this zone; any of them will do.", "grey", 11) end
+        if not done then Text("Walk up to it to read it.", "grey", 11) end
     elseif obj.c == "travel" then
         Heading("Flight path")
         local f = ({ A = "Alliance", H = "Horde", B = "Alliance and Horde" })[obj.f or "B"]

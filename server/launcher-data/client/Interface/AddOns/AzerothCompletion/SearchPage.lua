@@ -33,6 +33,7 @@ local KINDS = {
     { key = "rare",        title = "Rare Hunts",       icon = AZC.CATEGORY_INFO.rares.icon },
     { key = "elite",       title = "Elite Encounters", icon = AZC.CATEGORY_INFO.elites.icon },
     { key = "travel",      title = "Flight Paths",     icon = AZC.CATEGORY_INFO.travel.icon },
+    { key = "lore",        title = "Lore",             icon = AZC.CATEGORY_INFO.lore.icon },
 }
 
 local rows, used = {}, 0

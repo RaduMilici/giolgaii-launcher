@@ -55,3 +55,6 @@ PVP_MEDAL119 = "Friend of Kaneq'nuun"  -- Icepoint Rock
 PVP_MEDAL120 = "Pathfinder of the Eastern Kingdoms"  -- region: Eastern Kingdoms
 PVP_MEDAL121 = "Pathfinder of Kalimdor"  -- region: Kalimdor
 PVP_MEDAL122 = "Master of Azeroth"  -- region: Azeroth
+PVP_MEDAL123 = "Lorekeeper"  -- 25 lore
+PVP_MEDAL124 = "Keeper of Histories"  -- 100 lore
+PVP_MEDAL125 = "Seeker of Secrets"  -- 3 secret

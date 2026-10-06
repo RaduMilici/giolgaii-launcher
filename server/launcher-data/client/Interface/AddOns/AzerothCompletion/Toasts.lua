@@ -142,13 +142,21 @@ local OBJECTIVE_TITLES = {
     RARE = "RARE HUNT COMPLETE",
     ELITE = "ELITE DEFEATED",
     TRAVEL = "FLIGHT PATH DISCOVERED",
+    LORE = "LORE FOUND",
 }
 
 AZC.On("ServerEvent", function(ev)
     if not AZC.db then return end
     local zoneId = AZC.Num(ev.z)
     local zoneName = ev.zn or ""
-    if ev.t == "OBJECTIVE_COMPLETED" and AZC.db.notifications then
+    if ev.t == "OBJECTIVE_COMPLETED" and ev.c == "LORE" and AZC.db.notifications then
+        -- lore is always extra: no "BONUS", and the count is world-wide
+        local secret = AZC.Bool(ev.sec)
+        T.Push({ zoneId = zoneId, icon = secret and "Interface\\Icons\\INV_Misc_Gem_Pearl_04" or AZC.CATEGORY_INFO.lore.icon,
+            title = secret and "SECRET FOUND" or "LORE FOUND", name = ev.n,
+            sub = AZC.Num(ev.lf) .. " / " .. AZC.Num(ev.lt) .. (secret and " secrets" or " lore") .. "      " .. zoneName,
+            sound = secret and "QUESTCOMPLETED" or "QUESTADDED" })
+    elseif ev.t == "OBJECTIVE_COMPLETED" and AZC.db.notifications then
         local cat = AZC.EVENT_CATEGORY[ev.c] or "exploration"
         local info = AZC.CATEGORY_INFO[cat]
         local title = OBJECTIVE_TITLES[ev.c] or "OBJECTIVE COMPLETE"
@@ -173,6 +181,11 @@ AZC.On("ServerEvent", function(ev)
         local sub = ev.rw and ev.rw ~= "" and ("Reward: " .. ev.rw) or ("All " .. AZC.Num(ev.zc) .. " zones complete.")
         T.Push({ tab = "azeroth", icon = "Interface\\Icons\\INV_Misc_Map02", title = "REGION COMPLETE",
             name = AZC.Upper(ev.rn or ""), sub = sub, sound = "LEVELUPSOUND", big = true })
+    elseif ev.t == "LORE_MILESTONE" and AZC.db.milestoneNotifications then
+        local secret = ev.k == "secret"
+        local sub = ev.rw and ev.rw ~= "" and ("Reward: " .. ev.rw) or ""
+        T.Push({ tab = "azeroth", icon = AZC.CATEGORY_INFO.lore.icon, title = secret and "SECRETS" or "LORE & SECRETS",
+            name = AZC.Num(ev.cnt) .. (secret and " SECRETS FOUND" or " LORE FOUND"), sub = sub, sound = "QUESTCOMPLETED", big = true })
     elseif ev.t == "ZONE_COMPLETED" and AZC.db.milestoneNotifications then
         T.Push({ zoneId = zoneId, icon = "Interface\\Icons\\INV_Misc_Map_01", title = "ZONE COMPLETE",
             name = AZC.Upper(zoneName) .. "  100%", sub = "Every corner explored, every tale told.", sound = "LEVELUPSOUND", big = true })

@@ -166,7 +166,7 @@ local function Card()
         hl:SetAlpha(0.25)
         c:SetScript("OnEnter", function()
             local region = this.region
-            if region then W.ShowTooltip(this, region.n, ZoneLines(region)) end
+            if region then W.ShowTooltip(this, region.n, region.lines or ZoneLines(region)) end
         end)
         c:SetScript("OnLeave", function() GameTooltip:Hide() end)
         cards[usedCards] = c
@@ -252,6 +252,70 @@ local function PlaceRegions()
     return yy + 14
 end
 
+-- ---------------------------------------------------------------------------
+-- lore & secrets: one card with the counts and the next rewards
+
+local loreTitle
+
+local function TierText(t)
+    return AZC.Num(t.cnt) .. (t.k == "secret" and " secrets" or " lore")
+end
+
+-- A card-shaped summary: counts, the next reward of each kind, every tier in the tooltip.
+local function LoreSummary(l)
+    local lore = l.lore
+    local f, tot, sf, st = AZC.Num(lore.f), AZC.Num(lore.tot), AZC.Num(lore.sf), AZC.Num(lore.st)
+    local s = { id = "lore", n = "Lore & Secrets", icon = AZC.CATEGORY_INFO.lore.icon, d = f, tot = tot,
+        desc = "Walk up to books, plaques and monuments to read them. Secrets lie far from any town." }
+    local items, texts = {}, {}
+    local nextOf = {}
+    for _, t in ipairs(l.tiers) do
+        if not AZC.Bool(t.got) and not nextOf[t.k] then
+            nextOf[t.k] = t
+            if t.it and t.it ~= "" then table.insert(items, t.it) end
+            local extra = (t.rx and t.rx ~= "") and t.rx or ((not t.it or t.it == "") and t.rw or "")
+            if extra and extra ~= "" then table.insert(texts, TierText(t) .. ": " .. extra) end
+        end
+    end
+    s.it = table.concat(items, ",")
+    s.rx = texts[1] or ""      -- one line fits next to the icons; the tooltip has every tier
+    s.earned = table.getn(l.tiers) > 0 and not nextOf.lore and not nextOf.secret
+    s.lines = { { f .. " / " .. tot .. " lore found", "white" }, { sf .. " / " .. st .. " secrets found", "white" }, "" }
+    for _, t in ipairs(l.tiers) do
+        local got = AZC.Bool(t.got)
+        table.insert(s.lines, { left = TierText(t), right = got and "Reached" or (t.rw or ""),
+            leftColor = got and "gold" or "white", rightColor = got and "gold" or "paleGold" })
+    end
+    return s, sf, st
+end
+
+-- Places the lore card at y; returns the height it takes.
+local function PlaceLore(y)
+    if not loreTitle then
+        loreTitle = W.Text(child, 17, "gold", AZC.FONT_TITLE)
+        loreTitle:SetHeight(24)
+    end
+    local l = D.lore
+    if not l then
+        if AZC.Protocol.IsReady() and not D.IsLoading("lore") and not D.HasFailed("lore") then D.RequestLore() end
+        loreTitle:Hide()
+        return 0
+    end
+    if not l.lore or AZC.Num(l.lore.tot) == 0 then
+        loreTitle:Hide()
+        return 0
+    end
+    local s, sf, st = LoreSummary(l)
+    loreTitle:SetText("LORE & SECRETS")
+    view:Place(loreTitle, 4, y, 24)
+    local c = Card()
+    c:ClearAllPoints()
+    view:Place(c, 0, y + 26, REGION_HEIGHT - 6)
+    FillCard(c, s)
+    c.count:SetText(s.d .. " / " .. s.tot .. " lore    " .. sf .. " / " .. st .. " secrets")
+    return 26 + REGION_HEIGHT + 14
+end
+
 local function Header(i)
     local h = headers[i]
     if not h then
@@ -291,6 +355,7 @@ function page:Refresh()
     end
 
     local base = PlaceRegions()
+    base = base + PlaceLore(base)
     local currentZone = p.cur and AZC.Num(p.cur.z) or 0
     local allPct, allCount, completed = 0, 0, 0
     local maxHeight = 0
@@ -372,6 +437,7 @@ function page:Show(params)
     if AZC.Protocol.IsReady() then
         D.RequestProgress()
         D.RequestRegions()
+        D.RequestLore()
     end
     self:Refresh()
 end

@@ -8,7 +8,7 @@ AZC.VERSION = "1.0.0"
 AZC.PROTOCOL = 1            -- the protocol this addon speaks (AZCOMP_PROTOCOL)
 AZC.PREFIX = "AZC"
 
-AZC.CATEGORIES = { "exploration", "storylines", "rares", "elites", "travel" }
+AZC.CATEGORIES = { "exploration", "storylines", "rares", "elites", "travel", "lore" }
 
 AZC.CATEGORY_INFO = {
     exploration = { title = "Exploration",      icon = "Interface\\Icons\\INV_Misc_Spyglass_03",    event = "EXPLORATION",
@@ -21,10 +21,13 @@ AZC.CATEGORY_INFO = {
                     single = "elite",     hiddenName = "Unknown Elite" },
     travel      = { title = "Travel",           icon = "Interface\\Icons\\Ability_Rogue_Sprint",    event = "TRAVEL",
                     single = "flight path", hiddenName = "Unknown Flight Path" },
+    -- usually extra only: the server sends it with vis=0 and bonus counts
+    lore        = { title = "Lore & Secrets",   icon = "Interface\\Icons\\INV_Misc_Book_11",        event = "LORE",
+                    single = "secret",    hiddenName = "Undiscovered Secret", bonusOnly = true },
 }
 
 -- event category -> category key
-AZC.EVENT_CATEGORY = { EXPLORATION = "exploration", STORYLINE = "storylines", RARE = "rares", ELITE = "elites", TRAVEL = "travel" }
+AZC.EVENT_CATEGORY = { EXPLORATION = "exploration", STORYLINE = "storylines", RARE = "rares", ELITE = "elites", TRAVEL = "travel", LORE = "lore" }
 
 AZC.COLORS = {
     gold      = { 1.00, 0.82, 0.00 },
@@ -198,6 +201,8 @@ AZC.BONUS_TEXT = {
     phased = "Appears through special circumstances",
     override_bonus = "Bonus objective",
     no_reliable_quests = "Bonus storyline",
+    lore = "Lore is read for its own sake and for the lore rewards",
+    secret = "A secret, far from any town",
 }
 
 -- Title of a quest in its storyline; chains often reuse one title, so repeated titles get

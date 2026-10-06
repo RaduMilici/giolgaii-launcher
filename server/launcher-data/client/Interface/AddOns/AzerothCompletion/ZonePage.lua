@@ -425,6 +425,8 @@ local function CategoryRow(z, key, catRec, expandable)
     local info = AZC.CATEGORY_INFO[key]
     local r = AddRow(50)
     local done, total = AZC.Num(catRec.d), AZC.Num(catRec.tot)
+    local bonusOnly = total == 0 and AZC.Num(catRec.bt) > 0     -- lore that does not count
+    if bonusOnly then done, total = AZC.Num(catRec.bd), AZC.Num(catRec.bt) end
     local complete = total > 0 and done >= total
     r:SetBackdrop(W.BACKDROPS.thin)
     r:SetBackdropColor(0.12, 0.10, 0.07, complete and 0.85 or 0.7)
@@ -463,8 +465,12 @@ local function CategoryRow(z, key, catRec, expandable)
 
     r.tooltip = function()
         local lines = { { AZC.Num(catRec.pct) .. "% of this category", "white" } }
+        if bonusOnly then
+            lines = { { done .. " / " .. total .. " found", "white" },
+                { "Extra: does not count towards the zone. Walk up to books, plaques and monuments to read them.", "grey", true } }
+        end
         if AZC.Num(catRec.w) > 0 then table.insert(lines, { "Worth " .. AZC.Num(catRec.w) .. "% of the zone", "grey" }) end
-        if AZC.Num(catRec.bt) > 0 then
+        if AZC.Num(catRec.bt) > 0 and not bonusOnly then
             table.insert(lines, { "Bonus: " .. AZC.Num(catRec.bd) .. " / " .. AZC.Num(catRec.bt) .. " (not required)", "paleGold" })
         end
         if expandable then table.insert(lines, { "Click to " .. (page.expanded[key] and "collapse" or "expand"), "paleGold" }) end
@@ -506,6 +512,7 @@ local function ObjectiveTooltip(obj)
         if AZC.Bool(obj.b) then table.insert(lines, { "Bonus - " .. (AZC.BONUS_TEXT[obj.br] or "not required"), "blue" }) end
         if obj.an and obj.an ~= "" and not hidden then table.insert(lines, { "Near " .. obj.an, "parchment" }) end
         if obj.h and obj.h ~= "" then table.insert(lines, { obj.h, "parchment", true }) end
+        if obj.txt and obj.txt ~= "" then table.insert(lines, { "\"" .. obj.txt .. "\"", "parchment", true }) end
         if obj.c == "storylines" and obj.qt then table.insert(lines, { "Progress " .. AZC.Num(obj.qd) .. " / " .. AZC.Num(obj.qt), "white" }) end
         table.insert(lines, { "Click for details", "paleGold" })
         return name, lines
@@ -542,7 +549,12 @@ local function ObjectiveRow(z, obj, indent)
     else
         W.SetColor(r.text, done and "paleGold" or "white")
     end
-    if AZC.Bool(obj.b) then r.text:SetText(name .. AZC.Color("blue", "  bonus")) end
+    if obj.c == "lore" then
+        -- every lore objective is extra; mark the secrets instead
+        if AZC.Bool(obj.sec) and not hidden then r.text:SetText(name .. AZC.Color("blue", "  secret")) end
+    elseif AZC.Bool(obj.b) then
+        r.text:SetText(name .. AZC.Color("blue", "  bonus"))
+    end
 
     -- right side: storyline progress, level range for creatures
     if obj.c == "storylines" and obj.qt then
@@ -719,8 +731,8 @@ local function ViewAll(z, onlyDone)
     local any = false
     for _, key in ipairs(AZC.CATEGORIES) do
         local c = z.cats[key]
-        if c and AZC.Bool(c.vis) then
-            any = true
+        if c and (AZC.Bool(c.vis) or (AZC.CATEGORY_INFO[key].bonusOnly and AZC.Num(c.bt) > 0)) then
+            any = any or AZC.Bool(c.vis)
             CategoryRow(z, key, c, true)
             if page.expanded[key] then
                 local list = CategoryObjects(z, key, onlyDone)
@@ -922,7 +934,8 @@ function page:Show(params)
         elseif prefix == "exploration" then cat = "exploration"
         elseif prefix == "rare" then cat = "rares"
         elseif prefix == "elite" then cat = "elites"
-        elseif prefix == "travel" then cat = "travel" end
+        elseif prefix == "travel" then cat = "travel"
+        elseif prefix == "lore" then cat = "lore" end
         if cat then self.expanded[cat] = true end
         if prefix == "storyline" then
             local sid = AZC.Num(string.sub(focus, 11))

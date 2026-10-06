@@ -11,6 +11,7 @@ D.stories = {}      -- storylineId -> { story, quests = {id = QUEST}, order = {i
 D.details = {}      -- objectiveId -> records
 D.progress = nil    -- { cur = CUR, zones = {ZSUM...} }
 D.regions = nil     -- { REGION... } in display order, each with .zones = {RZ...}
+D.lore = nil        -- { lore = LORE, tiers = {LMS...}, zones = {LZ...} }
 D.currentZoneId = nil
 
 local inflight = {}
@@ -188,6 +189,19 @@ function D.RequestRegions(cb)
     end, cb)
 end
 
+function D.RequestLore(cb)
+    Fetch("lore", "GET_LORE", "", function(records)
+        local l = { tiers = {}, zones = {} }
+        for _, rec in ipairs(records) do
+            if rec.type == "LORE" then l.lore = rec
+            elseif rec.type == "LMS" then table.insert(l.tiers, rec)
+            elseif rec.type == "LZ" then table.insert(l.zones, rec) end
+        end
+        D.lore = l
+        AZC.Fire("DataChanged", "lore")
+    end, cb)
+end
+
 function D.Search(text, cb)
     AZC.Protocol.Request("SEARCH", text, cb)
 end
@@ -250,6 +264,7 @@ local function Invalidate(zoneId)
     D.stories = {}
     D.progress = nil
     D.regions = nil
+    D.lore = nil
     failedAt = {}
 end
 D.Invalidate = Invalidate
@@ -283,6 +298,12 @@ AZC.On("ServerEvent", function(ev)
         AZC.Fire("DataChanged", "regions")
         return
     end
+    if ev.t == "LORE_MILESTONE" then
+        D.lore = nil
+        AZC.Fire("DataChanged", "lore")
+        return
+    end
+    if ev.c == "LORE" then D.lore = nil end
     -- the server changed something in zone z: forget what we knew and ask again
     local zoneId = AZC.Num(ev.z)
     if zoneId > 0 then

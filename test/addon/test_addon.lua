@@ -22,7 +22,8 @@ local CATS = rec("CAT", { "c", "exploration", "d", 10, "tot", 13, "pct", 76, "w"
     rec("CAT", { "c", "storylines", "d", 5, "tot", 7, "pct", 71, "w", 30, "vis", 1, "bd", 0, "bt", 1 }) .. ";" ..
     rec("CAT", { "c", "rares", "d", 3, "tot", 6, "pct", 50, "w", 15, "vis", 1, "bd", 0, "bt", 1 }) .. ";" ..
     rec("CAT", { "c", "elites", "d", 2, "tot", 4, "pct", 50, "w", 15, "vis", 1 }) .. ";" ..
-    rec("CAT", { "c", "travel", "d", 1, "tot", 1, "pct", 100, "w", 10, "vis", 1 })
+    rec("CAT", { "c", "travel", "d", 1, "tot", 1, "pct", 100, "w", 10, "vis", 1 }) .. ";" ..
+    rec("CAT", { "c", "lore", "d", 0, "tot", 0, "pct", 0, "w", 0, "vis", 0, "bd", 2, "bt", 3 })
 -- 25: claimed before rewards were recorded; 50: claimed with items; 75/100: open, with items
 local MS = rec("MS", { "m", 25, "got", 1 }) .. ";" ..
     rec("MS", { "m", 50, "got", 1, "rw", "120 XP, Westfall Charm", "rx", "120 XP", "it", "93503:1" }) .. ";" ..
@@ -38,6 +39,10 @@ local OBJS = {
         rec("OBJ", { "id", "rare:888", "c", "rares", "n", "Leprithus", "d", 0, "z", 40, "b", 1, "br", "event_only", "hid", 1 }),
     elites = rec("OBJ", { "id", "elite:573", "c", "elites", "n", "Foe Reaper 4000", "d", 0, "z", 40, "lmin", 20, "lmax", 20, "imp", 7, "hid", 1 }),
     travel = rec("OBJ", { "id", "travel:4", "c", "travel", "n", "Sentinel Hill, Westfall", "d", 1, "z", 40, "node", 4, "f", "A", "an", "Sentinel Hill" }),
+    lore = rec("OBJ", { "id", "lore:20808", "c", "lore", "n", "In Loving Memory", "d", 1, "z", 40, "b", 1, "br", "secret", "sec", 1, "sc", 1, "e", 181062,
+            "m", 0, "x", -1393, "y", -1102, "an", "The Dagger Hills", "txt", "Here lies a friend of the Militia." }) .. ";" ..
+        rec("OBJ", { "id", "lore:31619", "c", "lore", "n", "Westfall: A History", "d", 1, "z", 40, "b", 1, "br", "lore", "sc", 2, "e", 175000, "an", "Sentinel Hill" }) .. ";" ..
+        rec("OBJ", { "id", "lore:5001317", "c", "lore", "n", "Weathered Journal", "d", 0, "z", 40, "b", 1, "br", "secret", "sec", 1, "hid", 1, "sc", 1, "a", 920, "an", "The Dagger Hills" }),
 }
 local STORY = rec("STORY", { "id", 65, "n", "The Defias Brotherhood", "sum", "Uncover the plot.", "z", 40, "f", "A", "lmin", 14, "lmax", 22, "qd", 4, "qt", 7, "d", 0, "app", 1, "nx", 142, "q", "65,132,142,155,166,214", "roots", 65, "term", "166,214", "brn", 155, "blk", 142 }) .. ";" ..
     rec("EXG", { "s", 65, "g", 7, "q", "166,214" }) .. ";" ..
@@ -78,6 +83,9 @@ local function Payload(cmd, args)
         end
         if string.find(args, "^storyline") then return W40 .. ";" .. CATS .. ";" .. OBJS.storylines .. ";" .. STORY end
         if string.find(args, "^travel") then return W40 .. ";" .. CATS .. ";" .. OBJS.travel end
+        if string.find(args, "^lore") then
+            return W40 .. ";" .. CATS .. ";" .. OBJS.lore .. ";" .. rec("SPAWN", { "id", args, "m", 0, "x", -1393, "y", -1102 })
+        end
         return W40 .. ";" .. CATS .. ";" .. OBJS.exploration .. ";" .. rec("AREA", { "id", args, "a", 920, "an", "The Dagger Hills", "p", 40, "pn", "Westfall", "cells", 160 })
     end
     if cmd == "GET_CURRENT_PROGRESS" then
@@ -96,11 +104,21 @@ local function Payload(cmd, args)
                 "rw", "50g, title \"Pathfinder of the Eastern Kingdoms\"", "rx", "50g, title \"Pathfinder of the Eastern Kingdoms\"" }) .. ";" ..
             rec("RZ", { "r", 9, "z", 12, "zn", "Elwynn Forest", "pct", 100, "earned", 1, "app", 1 })
     end
+    if cmd == "GET_LORE" then
+        return rec("LORE", { "f", 12, "tot", 190, "sf", 2, "st", 17, "mand", 0 }) .. ";" ..
+            rec("LMS", { "k", "lore", "cnt", 10, "got", 1, "at", 1790000000, "rw", "10g, Inkwing Raven", "rx", "10g", "it", "93850:1" }) .. ";" ..
+            rec("LMS", { "k", "lore", "cnt", 25, "got", 0, "rw", "title \"Lorekeeper\"", "rx", "title \"Lorekeeper\"" }) .. ";" ..
+            rec("LMS", { "k", "lore", "cnt", 50, "got", 0, "rw", "25g, Tabard of the Chronicler", "rx", "25g", "it", "93852:1" }) .. ";" ..
+            rec("LMS", { "k", "secret", "cnt", 3, "got", 0, "rw", "title \"Seeker of Secrets\"", "rx", "title \"Seeker of Secrets\"" }) .. ";" ..
+            rec("LMS", { "k", "secret", "cnt", 10, "got", 0, "rw", "25g, Curious Mana Wyrm", "rx", "25g", "it", "93855:1" }) .. ";" ..
+            rec("LZ", { "z", 40, "zn", "Westfall", "map", 0, "f", 2, "tot", 3, "sf", 1, "st", 2 })
+    end
     if cmd == "SEARCH" then
         return rec("HIT", { "k", "zone", "id", "zone:40", "n", "Westfall", "z", 40, "zn", "Westfall" }) .. ";" ..
             rec("HIT", { "k", "storyline", "id", "storyline:65", "n", "The Defias Brotherhood", "z", 40, "zn", "Westfall" }) .. ";" ..
             rec("HIT", { "k", "quest", "id", "storyline:65", "n", "Red Silk Bandanas", "z", 40, "zn", "Westfall", "q", 214 }) .. ";" ..
-            rec("HIT", { "k", "rare", "id", "rare:520", "n", "Brack", "z", 40, "zn", "Westfall" })
+            rec("HIT", { "k", "rare", "id", "rare:520", "n", "Brack", "z", 40, "zn", "Westfall" }) .. ";" ..
+            rec("HIT", { "k", "lore", "id", "lore:31619", "n", "Westfall: A History", "z", 40, "zn", "Westfall" })
     end
     return rec("ERR", { "code", "UNKNOWN_REQUEST", "msg", cmd })
 end
@@ -257,6 +275,41 @@ Try("regions", function()
     for _, f in ipairs(AllFrames()) do if f.region and f.region.id == "1" then card = f end end
     this = card card._scripts.OnEnter()
 end)
+Try("lore", function()
+    local seen = {}
+    local function Walk(frame)
+        for _, c in ipairs(frame._children) do
+            if c._kind == "FontString" and c._shown and c._text ~= "" then seen[c._text] = true end
+            if c._shown then Walk(c) end
+        end
+    end
+    Walk(AZC.AzerothPage.frame)
+    assert(seen["LORE & SECRETS"], "lore section on the Azeroth page")
+    assert(seen["12 / 190 lore    2 / 17 secrets"], "lore counts")
+    assert(seen["25 lore: title \"Lorekeeper\""], "next lore reward as text")
+    local card
+    for _, f in ipairs(AllFrames()) do if f.region and f.region.id == "lore" then card = f end end
+    assert(card, "lore card")
+    this = card card._scripts.OnEnter()
+    -- the zone page lists bonus-only lore with its bonus counts, and secrets stay hidden
+    AZC.UI.OpenZone(40) Pump()
+    AZC.ZonePage.filter = "all"
+    AZC.ZonePage.expanded = { lore = true }
+    AZC.ZonePage:Refresh() Pump() AZC.ZonePage:Refresh()
+    -- the lore rows sit below the other categories: scroll the list to the bottom
+    for _, f in ipairs(AllFrames()) do
+        local p = f._parent
+        while p and p ~= AZC.ZonePage.frame do p = p._parent end
+        if p and f._scripts.OnMouseWheel then this = f arg1 = -50 f._scripts.OnMouseWheel() end
+    end
+    seen = {}
+    Walk(AZC.ZonePage.frame)
+    assert(seen["Lore & Secrets"] and seen["2 / 3"], "bonus-only lore category row")
+    assert(seen["Undiscovered Secret"], "unfound secret is hidden")
+    assert(not seen["Weathered Journal"], "secret name not shown")
+    AZC.UI.OpenZone(40, "lore:20808") Pump() RunUpdates(0.2)
+    clicks = clicks + ClickAll("lore")
+end)
 Try("search", function() AZC.UI.Navigate("search", { text = "defias" }) Pump() AZC.UI.Refresh() clicks = clicks + ClickAll("search") Pump() end)
 Try("settings", function() AZC.UI.Navigate("settings", {}) clicks = clicks + ClickAll("settings") end)
 Try("back", function() for i = 1, 5 do AZC.UI.Back() end end)
@@ -270,6 +323,9 @@ Try("events", function()
     Event({ "t", "DEFINITION_UPDATED", "gen", 2, "zones", "40:4" })
     Event({ "t", "RETROACTIVE", "count", 3 })
     Event({ "t", "REGION_COMPLETED", "r", 1, "rn", "The Kingdom of Azeroth", "zc", 8, "rw", "25g, Lion's Pride Charger", "it", "93801:1" })
+    Event({ "t", "OBJECTIVE_COMPLETED", "z", 40, "zn", "Westfall", "zp", 100, "c", "LORE", "cd", 0, "ct", 0, "id", "lore:5001317", "n", "Weathered Journal",
+        "b", 1, "sec", 1, "lf", 3, "lt", 17, "txt", "The tide took the boat." })
+    Event({ "t", "LORE_MILESTONE", "k", "secret", "cnt", 3, "tot", 17, "rw", "title \"Seeker of Secrets\"", "rx", "title \"Seeker of Secrets\"" })
     Pump() RunUpdates(40) Pump()
     clicks = clicks + ClickAll("after events")
 end)
